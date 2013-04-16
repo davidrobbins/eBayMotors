@@ -39,7 +39,7 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 	function loadVariantSelectBox(modelId, modelTitle, makeTitle) {
 		ds.Variant.query("model.ID == :1", modelId, {
 			onSuccess: function(ev1) {
-				$('#filterVariantContainer').empty();
+				//$('#filterVariantContainer').empty();
 				if (ev1.entityCollection.length > 0) {
 					ev1.entityCollection.forEach({
 						onSuccess: function(ev2) {
@@ -81,7 +81,6 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 		});
 	}
 
-
 	function loadMakeSelectBox() {
 		ds.Make.all({
 			onSuccess: function(ev1) {
@@ -106,26 +105,18 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 	{// @endlock
 		loadMakeSelectBox();
 		
-			//Create event handler for our Make select.
-			//#filterMakeContainer
-			//div.filterContainer
-		/*
-		$('#filterMakeContainer').on('click', 'div', function() {
-			$this = $(this);
-			loadModelSelectBox($this[0].innerHTML);
-		});	
-		*/
-		
-		
 		$('div.filterContainer').on('click', 'div', function() {
 			$this = $(this);
 			$this.addClass('selected');
 			
 			if ($this.parent().attr("id") == "filterMakeContainer") {
-				loadModelSelectBox($this.data("id"), $this.data("title")); //$this[0].innerHTML
+				$('#filterModelContainer').empty();
+				$('#filterVariantContainer').empty();
+				loadModelSelectBox($this.data("id"), $this.data("title"));
 			}
 			
 			if ($this.parent().attr("id") == "filterModelContainer") {
+				$('#filterVariantContainer').empty();
 				loadVariantSelectBox($this.data("id"), $this.data("title"), $this.data("make"));
 			}
 			
@@ -143,7 +134,14 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 			$this.removeClass('inFocus');
 		});	
 		
-		
+		//Event handler for vehicle disclosure
+		$('#selectVehiclesContainer').on('click', '.vehicleGroupHeader', function() {
+			$this = $(this);
+			$this.siblings().toggle();
+//			$this.nextUntil('dt').slideDown(300);
+//			$this.siblings('dt').nextUntil('dt').slideUp(300);
+		});
+
 	};// @lock
 
 // @region eventManager// @startlock

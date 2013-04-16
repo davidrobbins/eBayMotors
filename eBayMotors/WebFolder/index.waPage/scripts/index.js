@@ -5,48 +5,34 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 	var documentEvent = {};	// @document
 // @endregion// @endlock
 
-	function loadVehiclesSelectBox(variantId, variantTitle, modelTitle, makeTitle) {
+	function addToVehiclesSelectBox(variantId, variantTitle, modelTitle, makeTitle) {
+		var divVehicleWrapper = $('<div>', {});
+		var vehicleHeader = $('<div>', {
+			html: "<strong>" + makeTitle + "</strong>" + " • " + modelTitle + " • " + variantTitle + "<span class='quiet'>" + " • " + "no vehicles selected" + "</span>",
+			"class" : "vehicleGroupHeader",
+			"data-id" : variantId
+		}).appendTo(divVehicleWrapper);
+		
+							
+							
 		ds.Vehicle.query("variant.ID == :1", variantId, {
 			onSuccess: function(ev1) {
-				if (ev1.entityCollection.length > 0) {
+				if (ev1.entityCollection.length > 0) {	
 					ev1.entityCollection.forEach({
 						onSuccess: function(ev2) {
 							$('<div>', {
-								html: "<strong>" + makeTitle + "</strong>" + " • " + modelTitle + " • " + variantTitle + "<span class='quiet'>" + " • " + "no vehicles selected" + "</span>",
-								"class" : "vehicleTitle",
+								html: "<strong>" + ev2.entity.name.getValue() + "</strong>" + " • " + ev2.entity.engineDisplacement.getValue() + "ccm " + ev2.entity.horsePower.getValue() + "HP",
+								"class" : "vehicleGroupItem",
 								"data-id" : ev2.entity.ID.getValue()
-							}).appendTo('#selectVehiclesContainer');
+							}).appendTo(divVehicleWrapper);
 						}
 					}); //ev1.entityCollection.forEach
 				} //if (ev1.entityCollection.length > 0)
 			} //onSuccess: function(ev1)
 		});
+	
+		$('#selectVehiclesContainer').append(divVehicleWrapper);
 		
-		/*
-		$('<div>', {
-			text: "test",
-			"class": "vehicleContainer"
-		}).appendTo('#selectVehiclesContainer');
-		*/
-		
-		/*
-		var divHandle = $('<div>', {
-			text: "one"
-		});
-		
-		var divHandle2 = $('<div>', {
-			text: "two"
-		});
-		
-		var divHandle3 = $('<div>', {
-			
-		});
-		
-		
-		divHandle3.append(divHandle);
-		divHandle3.append(divHandle2);
-		$('#selectVehiclesContainer').append(divHandle3);
-		*/
 		
 	}
 	
@@ -144,7 +130,7 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 			}
 			
 			if ($this.parent().attr("id") == "filterVariantContainer") {
-				loadVehiclesSelectBox($this.data("id"), $this.data("title"), $this.data("model"), $this.data("make"));
+				addToVehiclesSelectBox($this.data("id"), $this.data("title"), $this.data("model"), $this.data("make"));
 			}
 		});	
 		

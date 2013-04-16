@@ -5,7 +5,24 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 	var documentEvent = {};	// @document
 // @endregion// @endlock
 
-	function loadVehiclesSelectBox(variantId) {
+	function loadVehiclesSelectBox(variantId, variantTitle, modelTitle, makeTitle) {
+		
+		ds.Vehicle.query("variant.ID == :1", variantId, {
+			onSuccess: function(ev1) {
+				if (ev1.entityCollection.length > 0) {
+					ev1.entityCollection.forEach({
+						onSuccess: function(ev2) {
+							$('<div>', {
+								text: makeTitle + " • " + modelTitle + " • " + variantTitle + " • " + ev2.entity.name.getValue(),
+								"class" : "vehicleTitle",
+								"data-id" : ev2.entity.ID.getValue()
+							}).appendTo('#selectVehiclesContainer');
+						}
+					}); //ev1.entityCollection.forEach
+				} //if (ev1.entityCollection.length > 0)
+			} //onSuccess: function(ev1)
+		});
+		
 		/*
 		$('<div>', {
 			text: "test",
@@ -13,6 +30,7 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 		}).appendTo('#selectVehiclesContainer');
 		*/
 		
+		/*
 		var divHandle = $('<div>', {
 			text: "one"
 		});
@@ -29,21 +47,25 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 		divHandle3.append(divHandle);
 		divHandle3.append(divHandle2);
 		$('#selectVehiclesContainer').append(divHandle3);
-		
+		*/
 		
 	}
 	
-	function loadVariantSelectBox(modelId) {
+	function loadVariantSelectBox(modelId, modelTitle, makeTitle) {
 		ds.Variant.query("model.ID == :1", modelId, {
 			onSuccess: function(ev1) {
 				$('#filterVariantContainer').empty();
 				if (ev1.entityCollection.length > 0) {
 					ev1.entityCollection.forEach({
 						onSuccess: function(ev2) {
+							var title = ev2.entity.title.getValue();
 							$('<div>', {
-								text: ev2.entity.title.getValue(),
+								text: title,
 								"class" : "selectionElement",
-								"data-id" : ev2.entity.ID.getValue()
+								"data-id" : ev2.entity.ID.getValue(),
+								"data-title" : title,
+								"data-model" : modelTitle,
+								"data-make" : makeTitle
 							}).appendTo('#filterVariantContainer');
 						}
 					});
@@ -52,17 +74,20 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 		});
 	}
 	
-	function loadModelSelectBox(makeId) {
+	function loadModelSelectBox(makeId, makeTitle) {
 		ds.Model.query("make.ID == :1", makeId, {
 			onSuccess: function(ev1) {
 				$('#filterModelContainer').empty();
 				if (ev1.entityCollection.length > 0) {
 					ev1.entityCollection.forEach({
 						onSuccess: function(ev2) {
+							var title = ev2.entity.title.getValue();
 							$('<div>', {
-								text: ev2.entity.title.getValue(),
+								text: title,
 								"class" : "selectionElement",
-								"data-id" : ev2.entity.ID.getValue()
+								"data-id" : ev2.entity.ID.getValue(),
+								"data-title" : title,
+								"data-make" : makeTitle
 							}).appendTo('#filterModelContainer');
 						}
 					});
@@ -78,10 +103,12 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 				ev1.entityCollection.forEach({
 					onSuccess: function(ev2) {	
 						//Use jQuery to build the Definition Titles.
+						var title = ev2.entity.title.getValue();
 						$('<div>', {
-							text: ev2.entity.title.getValue(),
+							text: title,
 							"class" : "selectionElement",
-							"data-id" : ev2.entity.ID.getValue()
+							"data-id" : ev2.entity.ID.getValue(),
+							"data-title" : title
 						}).appendTo('#filterMakeContainer');	
 					}
 				});
@@ -110,15 +137,15 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 			$this.addClass('selected');
 			
 			if ($this.parent().attr("id") == "filterMakeContainer") {
-				loadModelSelectBox($this.data("id")); //$this[0].innerHTML
+				loadModelSelectBox($this.data("id"), $this.data("title")); //$this[0].innerHTML
 			}
 			
 			if ($this.parent().attr("id") == "filterModelContainer") {
-				loadVariantSelectBox($this.data("id"));
+				loadVariantSelectBox($this.data("id"), $this.data("title"), $this.data("make"));
 			}
 			
 			if ($this.parent().attr("id") == "filterVariantContainer") {
-				loadVehiclesSelectBox($this.data("id"));
+				loadVehiclesSelectBox($this.data("id"), $this.data("title"), $this.data("model"), $this.data("make"));
 			}
 		});	
 		

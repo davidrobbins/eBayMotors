@@ -6,14 +6,13 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 // @endregion// @endlock
 
 	function loadVehiclesSelectBox(variantId, variantTitle, modelTitle, makeTitle) {
-		
 		ds.Vehicle.query("variant.ID == :1", variantId, {
 			onSuccess: function(ev1) {
 				if (ev1.entityCollection.length > 0) {
 					ev1.entityCollection.forEach({
 						onSuccess: function(ev2) {
 							$('<div>', {
-								text: makeTitle + " • " + modelTitle + " • " + variantTitle + " • " + ev2.entity.name.getValue(),
+								html: "<strong>" + makeTitle + "</strong>" + " • " + modelTitle + " • " + variantTitle + "<span class='quiet'>" + " • " + "no vehicles selected" + "</span>",
 								"class" : "vehicleTitle",
 								"data-id" : ev2.entity.ID.getValue()
 							}).appendTo('#selectVehiclesContainer');

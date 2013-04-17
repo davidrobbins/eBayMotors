@@ -16,16 +16,41 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 							
 							
 		ds.Vehicle.query("variant.ID == :1", variantId, {
+			autoExpand: "manufactureCollection",
 			onSuccess: function(ev1) {
 				if (ev1.entityCollection.length > 0) {	
 					ev1.entityCollection.forEach({
 						onSuccess: function(ev2) {
-							$('<div>', {
+							var vehicleItemDiv = $('<div>', {
 								html: "<strong>" + ev2.entity.name.getValue() + "</strong>" + " • " + ev2.entity.engineDisplacement.getValue() + "ccm " + ev2.entity.horsePower.getValue() + "HP",
 								"class" : "vehicleGroupItem",
 								"data-id" : ev2.entity.ID.getValue()
 							}).appendTo(divVehicleWrapper);
-						}
+							
+							//Get manufacturer collection for current vehicle
+							var manufactureCollection = ev2.entity.manufactureCollection.relEntityCollection;
+							if (manufactureCollection.length > 0) {
+								var yearString = "",
+									count = 0;
+								manufactureCollection.forEach({
+									onSuccess: function(ev3) {
+										count += 1;
+										yearString += "<input type='checkbox'>";
+										yearString += " " + ev3.entity.year.getValue() + "&nbsp;&nbsp;&nbsp;";
+										if (count > 7) {
+											yearString += "<br/>";
+											count = 0;
+										}
+									}, //onSuccess: function(ev3)
+									atTheEnd: function(ev4) {
+										$('<div>', {
+											html: yearString,
+											"class" : "vehicleManufacture"
+										}).appendTo(divVehicleWrapper);		
+									}	
+								}); //manufactureCollection.toArray("year"
+							} //if (manufactureCollection.length > 0)
+						} //onSuccess: function(ev2)
 					}); //ev1.entityCollection.forEach
 				} //if (ev1.entityCollection.length > 0)
 			} //onSuccess: function(ev1)

@@ -4,7 +4,9 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 // @region namespaceDeclaration// @startlock
 	var documentEvent = {};	// @document
 // @endregion// @endlock
-
+	
+	var permModelIds = [];
+	
 	function addToVehiclesSelectBox(variantId, variantTitle, modelTitle, makeTitle) {
 		var divVehicleWrapper = $('<div>', {});
 		var vehicleHeader = $('<div>', {
@@ -61,7 +63,7 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 		
 	}
 	
-	function loadVariantSelectBox(modelId, modelTitle, makeTitle) {
+	function loadVariantSelectBox(modelId, modelTitle, makeTitle, makeId) {
 		ds.Variant.query("model.ID == :1", modelId, {
 			onSuccess: function(ev1) {
 				//$('#filterVariantContainer').empty();
@@ -75,7 +77,9 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 								"data-id" : ev2.entity.ID.getValue(),
 								"data-title" : title,
 								"data-model" : modelTitle,
-								"data-make" : makeTitle
+								"data-make" : makeTitle,
+								"data-makeid" : makeId,
+								"data-modelid" : modelId
 							}).appendTo('#filterVariantContainer');
 						}
 					});
@@ -91,13 +95,17 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 				if (ev1.entityCollection.length > 0) {
 					ev1.entityCollection.forEach({
 						onSuccess: function(ev2) {
+							//permModelIds
+							var theClassesString = permModelIds.indexOf(ev2.entity.ID.getValue()) != -1 ? "selectionElement selectedPerm" : "selectionElement"; 
+							
 							var title = ev2.entity.title.getValue();
 							$('<div>', {
 								text: title,
-								"class" : "selectionElement",
+								"class" : theClassesString,
 								"data-id" : ev2.entity.ID.getValue(),
 								"data-title" : title,
-								"data-make" : makeTitle
+								"data-make" : makeTitle,
+								"data-makeid" : makeId
 							}).appendTo('#filterModelContainer');
 						}
 					});
@@ -131,6 +139,7 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 		loadMakeSelectBox();
 		
 		$('div.filterContainer').on('click', 'div', function() {
+			$this.siblings().removeClass('inFocus selected');
 			$this = $(this);
 			$this.addClass('selected');
 			
@@ -142,11 +151,16 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 			
 			if ($this.parent().attr("id") == "filterModelContainer") {
 				$('#filterVariantContainer').empty();
-				loadVariantSelectBox($this.data("id"), $this.data("title"), $this.data("make"));
+				loadVariantSelectBox($this.data("id"), $this.data("title"), $this.data("make"), $this.data("makeid"));
 			}
 			
 			if ($this.parent().attr("id") == "filterVariantContainer") {
 				addToVehiclesSelectBox($this.data("id"), $this.data("title"), $this.data("model"), $this.data("make"));
+				
+				//add Perm Select to the make and model for this session.
+				$('#filterMakeContainer').find("div[data-id='" + $this.data("makeid") +"']").addClass('selectedPerm');
+				$('#filterModelContainer').find("div[data-id='" + $this.data("modelid") +"']").addClass('selectedPerm');
+				permModelIds.push($this.data("modelid"));
 			}
 		});	
 		

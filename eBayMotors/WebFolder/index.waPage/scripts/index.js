@@ -5,7 +5,8 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 	var documentEvent = {};	// @document
 // @endregion// @endlock
 	
-	var permModelIds = [];
+	var permModelIds = [],
+		permVariantIds = [];
 	
 	function addToVehiclesSelectBox(variantId, variantTitle, modelTitle, makeTitle) {
 		var divVehicleWrapper = $('<div>', {});
@@ -13,9 +14,7 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 			html: "<strong>" + makeTitle + "</strong>" + " • " + modelTitle + " • " + variantTitle + "<span class='quiet'>" + " • " + "no vehicles selected" + "</span>",
 			"class" : "vehicleGroupHeader",
 			"data-id" : variantId
-		}).appendTo(divVehicleWrapper);
-		
-							
+		}).appendTo(divVehicleWrapper);					
 							
 		ds.Vehicle.query("variant.ID == :1", variantId, {
 			autoExpand: "manufactureCollection",
@@ -59,8 +58,6 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 		});
 	
 		$('#selectVehiclesContainer').append(divVehicleWrapper);
-		
-		
 	}
 	
 	function loadVariantSelectBox(modelId, modelTitle, makeTitle, makeId) {
@@ -70,10 +67,11 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 				if (ev1.entityCollection.length > 0) {
 					ev1.entityCollection.forEach({
 						onSuccess: function(ev2) {
+							var theClassesString = permVariantIds.indexOf(ev2.entity.ID.getValue()) != -1 ? "selectionElement selectedPerm" : "selectionElement"; 
 							var title = ev2.entity.title.getValue();
 							$('<div>', {
 								text: title,
-								"class" : "selectionElement",
+								"class" : theClassesString,
 								"data-id" : ev2.entity.ID.getValue(),
 								"data-title" : title,
 								"data-model" : modelTitle,
@@ -160,7 +158,9 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 				//add Perm Select to the make and model for this session.
 				$('#filterMakeContainer').find("div[data-id='" + $this.data("makeid") +"']").addClass('selectedPerm');
 				$('#filterModelContainer').find("div[data-id='" + $this.data("modelid") +"']").addClass('selectedPerm');
+				$this.addClass('selectedPerm');
 				permModelIds.push($this.data("modelid"));
+				permVariantIds.push($this.data("id"));
 			}
 		});	
 		

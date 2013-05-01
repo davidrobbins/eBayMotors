@@ -1,0 +1,1 @@
+﻿//The customLoginListener() function will now authenticate all users.directory.setLoginListener("customLoginListener");

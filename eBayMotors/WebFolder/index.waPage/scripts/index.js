@@ -188,16 +188,24 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 			var this$ = $(this),
 				eventTarget$ = $(event.target);
 			
-			//console.log(event.target);
-			
-			//add Perm Select to the make and model and variant for this session.
-			/**/
-			$('#filterMakeContainer').find("div[data-id='" + eventTarget$.data("makeid") +"']").addClass('selectedPerm');
-			$('#filterModelContainer').find("div[data-id='" + eventTarget$.data("modelid") +"']").addClass('selectedPerm');
-			$('#filterModelContainer').find("div[data-id='" + eventTarget$.data("variantid") +"']").addClass('selectedPerm');
-			//$this.addClass('selectedPerm');
-			permModelIds.push($this.data("modelid"));
-			permVariantIds.push($this.data("id"));
+			if (eventTarget$.prop('checked')) {
+				//add Perm Select to the make and model and variant for this session.
+				$('#filterMakeContainer').find("div[data-id='" + eventTarget$.data("makeid") +"']").addClass('selectedPerm');
+				$('#filterModelContainer').find("div[data-id='" + eventTarget$.data("modelid") +"']").addClass('selectedPerm');
+				$('#filterVariantContainer').find("div[data-id='" + eventTarget$.data("variantid") +"']").addClass('selectedPerm');
+				//keep track of the permanently selected models and variants.
+				permModelIds.push($this.data("modelid"));
+				permVariantIds.push($this.data("id"));
+			} else {
+				$('#filterMakeContainer').find("div[data-id='" + eventTarget$.data("makeid") +"']").removeClass('selectedPerm');
+				$('#filterModelContainer').find("div[data-id='" + eventTarget$.data("modelid") +"']").removeClass('selectedPerm');
+				$('#filterVariantContainer').find("div[data-id='" + eventTarget$.data("variantid") +"']").removeClass('selectedPerm');
+				
+				var permModelIndex = permModelIds.indexOf($this.data("modelid")),
+					permVariantIndex = permVariantIds.indexOf($this.data("modelid"));
+				permModelIds.splice(permModelIndex,1);
+				permVariantIds.splice(permVariantIndex,1);
+			}
 			
 		});
 	};// @lock

@@ -8,12 +8,14 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 	var permModelIds = [],
 		permVariantIds = [];
 	
-	function addToVehiclesSelectBox(variantId, variantTitle, modelTitle, makeTitle) {
+	function addToVehiclesSelectBox(variantId, variantTitle, modelTitle, makeTitle, makeId, modelId) {
 		var divVehicleWrapper = $('<div>', {});
 		var vehicleHeader = $('<div>', {
 			html: "<strong>" + makeTitle + "</strong>" + " • " + modelTitle + " • " + variantTitle + "<span class='quiet'>" + " • " + "no vehicles selected" + "</span>",
 			"class" : "vehicleGroupHeader",
-			"data-id" : variantId
+			"data-id" : variantId,
+			"data-makeid" : makeId,
+			"data-modelid" : modelId
 		}).appendTo(divVehicleWrapper);					
 							
 		ds.Vehicle.query("variant.ID == :1", variantId, {
@@ -36,7 +38,11 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 								manufactureCollection.forEach({
 									onSuccess: function(ev3) {
 										count += 1;
-										yearString += "<input type='checkbox'>";
+										yearString += "<input type='checkbox' data-id='" + ev3.entity.ID.getValue() +  
+														"' data-makeid='" + makeId + "' " +
+														" data-modelid='" + modelId + "' " +
+														" data-variantid='" + variantId 
+														+ "'>";
 										yearString += " " + ev3.entity.year.getValue() + "&nbsp;&nbsp;&nbsp;";
 										if (count > 7) {
 											yearString += "<br/>";
@@ -46,7 +52,8 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 									atTheEnd: function(ev4) {
 										$('<div>', {
 											html: yearString,
-											"class" : "vehicleManufacture"
+											"class" : "vehicleManufacture" //,
+											//"data-id" : ev4.entity.ID.getValue()
 										}).appendTo(divVehicleWrapper);		
 									}	
 								}); //manufactureCollection.toArray("year"
@@ -153,14 +160,7 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 			}
 			
 			if ($this.parent().attr("id") == "filterVariantContainer") {
-				addToVehiclesSelectBox($this.data("id"), $this.data("title"), $this.data("model"), $this.data("make"));
-				
-				//add Perm Select to the make and model for this session.
-				$('#filterMakeContainer').find("div[data-id='" + $this.data("makeid") +"']").addClass('selectedPerm');
-				$('#filterModelContainer').find("div[data-id='" + $this.data("modelid") +"']").addClass('selectedPerm');
-				$this.addClass('selectedPerm');
-				permModelIds.push($this.data("modelid"));
-				permVariantIds.push($this.data("id"));
+				addToVehiclesSelectBox($this.data("id"), $this.data("title"), $this.data("model"), $this.data("make"), $this.data("makeid"), $this.data("modelid"));			
 			}
 		});	
 		
@@ -177,10 +177,29 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 		$('#selectVehiclesContainer').on('click', '.vehicleGroupHeader', function() {
 			$this = $(this);
 			$this.siblings().toggle();
-//			$this.nextUntil('dt').slideDown(300);
-//			$this.siblings('dt').nextUntil('dt').slideUp(300);
+			/*
+			$this.nextUntil('dt').slideDown(300);
+			$this.siblings('dt').nextUntil('dt').slideUp(300);
+			*/
 		});
-
+		
+		
+		$('#selectVehiclesContainer').on('click', '.vehicleManufacture', function(event) {
+			var this$ = $(this),
+				eventTarget$ = $(event.target);
+			
+			//console.log(event.target);
+			
+			//add Perm Select to the make and model and variant for this session.
+			/**/
+			$('#filterMakeContainer').find("div[data-id='" + eventTarget$.data("makeid") +"']").addClass('selectedPerm');
+			$('#filterModelContainer').find("div[data-id='" + eventTarget$.data("modelid") +"']").addClass('selectedPerm');
+			$('#filterModelContainer').find("div[data-id='" + eventTarget$.data("variantid") +"']").addClass('selectedPerm');
+			//$this.addClass('selectedPerm');
+			permModelIds.push($this.data("modelid"));
+			permVariantIds.push($this.data("id"));
+			
+		});
 	};// @lock
 
 // @region eventManager// @startlock

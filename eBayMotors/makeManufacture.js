@@ -1,0 +1,1 @@
+﻿//var mySweet320i = ds.Vehicle(22);//mySweet320i//Let's create some manufacturer information./*new ds.Manufacture({	year: 2000,	vehicle: mySweet320i}).save();*//*var vehicles = ds.Vehicle.all();vehicles.forEach(function(car) {	for (i = 0; i < 8; i++) {		new ds.Manufacture({			year: 2000 + i,			vehicle: car		}).save();	}});*/

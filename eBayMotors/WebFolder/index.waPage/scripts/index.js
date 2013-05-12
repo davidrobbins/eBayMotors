@@ -9,7 +9,9 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 		permVariantIds = [];
 	
 	function addToVehiclesSelectBox(variantId, variantTitle, modelTitle, makeTitle, makeId, modelId) {
-		var divVehicleWrapper = $('<div>', {});
+		var divVehicleWrapper = $('<div>', {
+			"class" : "vehicleGroupWrapper notSelected"
+		});
 		var vehicleHeader = $('<div>', {
 			html: "<strong>" + makeTitle + "</strong>" + " • " + modelTitle + " • " + variantTitle + "<span class='quiet'>" + " • " + "no vehicles selected" + "</span>",
 			"class" : "vehicleGroupHeader",
@@ -152,6 +154,12 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 				$('#filterModelContainer').empty();
 				$('#filterVariantContainer').empty();
 				loadModelSelectBox($this.data("id"), $this.data("title"));
+				
+				//experiment
+				//.selectedVehicleGroup
+				//this is exact opposite.
+				var selectedVehicles = $('#selectVehiclesContainer').children('.notSelected');
+				selectedVehicles.remove();
 			}
 			
 			if ($this.parent().attr("id") == "filterModelContainer") {
@@ -182,13 +190,17 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 			$this.siblings('dt').nextUntil('dt').slideUp(300);
 			*/
 		});
-		
-		
+				
 		$('#selectVehiclesContainer').on('click', '.vehicleManufacture', function(event) {
 			var this$ = $(this),
 				eventTarget$ = $(event.target);
+				
+				//eventTarget$.parent().parent();
 			
 			if (eventTarget$.prop('checked')) {
+				//add Perm Select class to vehicle group wrapper.
+				eventTarget$.parent().parent().removeClass('notSelected');
+				
 				//add Perm Select to the make and model and variant for this session.
 				$('#filterMakeContainer').find("div[data-id='" + eventTarget$.data("makeid") +"']").addClass('selectedPerm');
 				$('#filterModelContainer').find("div[data-id='" + eventTarget$.data("modelid") +"']").addClass('selectedPerm');
@@ -197,6 +209,10 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 				permModelIds.push($this.data("modelid"));
 				permVariantIds.push($this.data("id"));
 			} else {
+				//add Perm Select class to vehicle group wrapper.
+				eventTarget$.parent().parent().addClass('notSelected');
+				
+				//remove Perm Select to the make and model and variant for this session.
 				$('#filterMakeContainer').find("div[data-id='" + eventTarget$.data("makeid") +"']").removeClass('selectedPerm');
 				$('#filterModelContainer').find("div[data-id='" + eventTarget$.data("modelid") +"']").removeClass('selectedPerm');
 				$('#filterVariantContainer').find("div[data-id='" + eventTarget$.data("variantid") +"']").removeClass('selectedPerm');

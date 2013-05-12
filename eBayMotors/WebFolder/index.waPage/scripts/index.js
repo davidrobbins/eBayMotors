@@ -16,6 +16,7 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 			html: "<strong>" + makeTitle + "</strong>" + " • " + modelTitle + " • " + variantTitle + "<span class='quiet'>" + " • " + "no vehicles selected" + "</span>",
 			"class" : "vehicleGroupHeader",
 			"data-id" : variantId,
+			"data-count" : 0,
 			"data-makeid" : makeId,
 			"data-modelid" : modelId
 		}).appendTo(divVehicleWrapper);					
@@ -155,9 +156,7 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 				$('#filterVariantContainer').empty();
 				loadModelSelectBox($this.data("id"), $this.data("title"));
 				
-				//experiment
-				//.selectedVehicleGroup
-				//this is exact opposite.
+				//remove vehicles that are not checked.
 				var selectedVehicles = $('#selectVehiclesContainer').children('.notSelected');
 				selectedVehicles.remove();
 			}
@@ -165,11 +164,16 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 			if ($this.parent().attr("id") == "filterModelContainer") {
 				$('#filterVariantContainer').empty();
 				loadVariantSelectBox($this.data("id"), $this.data("title"), $this.data("make"), $this.data("makeid"));
+				
+				//remove vehicles that are not checked.
+				var selectedVehicles = $('#selectVehiclesContainer').children('.notSelected');
+				selectedVehicles.remove();
 			}
 			
 			if ($this.parent().attr("id") == "filterVariantContainer") {
 				addToVehiclesSelectBox($this.data("id"), $this.data("title"), $this.data("model"), $this.data("make"), $this.data("makeid"), $this.data("modelid"));			
 			}
+			
 		});	
 		
 		$('div.filterContainer').on('mouseenter', 'div', function() {
@@ -193,13 +197,28 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 				
 		$('#selectVehiclesContainer').on('click', '.vehicleManufacture', function(event) {
 			var this$ = $(this),
-				eventTarget$ = $(event.target);
+				eventTarget$ = $(event.target),
+				wrapper = eventTarget$.parent().parent(),
+				vehicleGroupHeader = wrapper.children(':first'),
+				vehicleCheckedCount = vehicleGroupHeader.data("count");
+				
+				console.log(vehicleCheckedCount);
 				
 				//eventTarget$.parent().parent();
 			
 			if (eventTarget$.prop('checked')) {
 				//add Perm Select class to vehicle group wrapper.
-				eventTarget$.parent().parent().removeClass('notSelected');
+				/*
+				var wrapper = eventTarget$.parent().parent(),
+					vehicleGroupHeader = wrapper.children(':first'),
+					vehicleCheckedCount = vehicleGroupHeader.data("count");
+				*/
+				
+					
+				wrapper.removeClass('notSelected');
+				vehicleCheckedCount += 1;
+				vehicleGroupHeader.attr("data-count", vehicleCheckedCount);
+				
 				
 				//add Perm Select to the make and model and variant for this session.
 				$('#filterMakeContainer').find("div[data-id='" + eventTarget$.data("makeid") +"']").addClass('selectedPerm');

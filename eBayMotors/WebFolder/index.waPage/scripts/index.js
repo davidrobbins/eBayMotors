@@ -200,9 +200,12 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 				eventTarget$ = $(event.target),
 				wrapper = eventTarget$.parent().parent(),
 				vehicleGroupHeader = wrapper.children(':first'),
-				vehicleCheckedCount = vehicleGroupHeader.data("count");
+				vehiclesSelectedText = wrapper.find('span'),
+				//vehicleCheckedCount = vehicleGroupHeader.data("count");
+				vehicleCheckedCount = +vehicleGroupHeader.attr("data-count");
 				
 				//console.log(vehicleCheckedCount);
+				//console.log(vehiclesSelectedText.html());
 				
 				//eventTarget$.parent().parent();
 			
@@ -217,8 +220,9 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 					
 				wrapper.removeClass('notSelected');
 				vehicleCheckedCount += 1;
+				vehiclesSelectedText.text(" • " + vehicleCheckedCount + " vehicles selected");
 				vehicleGroupHeader.attr("data-count", vehicleCheckedCount);
-				
+				//console.log(vehicleGroupHeader.attr("data-count"));
 				
 				//add Perm Select to the make and model and variant for this session.
 				$('#filterMakeContainer').find("div[data-id='" + eventTarget$.data("makeid") +"']").addClass('selectedPerm');

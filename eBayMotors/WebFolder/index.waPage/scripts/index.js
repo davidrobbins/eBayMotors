@@ -67,7 +67,8 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 			} //onSuccess: function(ev1)
 		});
 	
-		$('#selectVehiclesContainer').append(divVehicleWrapper);
+		$('#selectVehiclesContainer').append(divVehicleWrapper) //.find('.notSelected').effect("highlight");
+		
 	}
 	
 	function loadVariantSelectBox(modelId, modelTitle, makeTitle, makeId) {
@@ -146,32 +147,49 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 	{// @endlock
 		loadMakeSelectBox();
 		
-		$('div.filterContainer').on('click', 'div', function() {
+		$('div.filterContainer').on('click', 'div', function(event) {
 			$this.siblings().removeClass('inFocus selected');
 			$this = $(this);
 			$this.addClass('selected');
 			
+			//M A K E
 			if ($this.parent().attr("id") == "filterMakeContainer") {
 				$('#filterModelContainer').empty();
 				$('#filterVariantContainer').empty();
 				loadModelSelectBox($this.data("id"), $this.data("title"));
 				
-				//remove vehicles that are not checked.
-				var selectedVehicles = $('#selectVehiclesContainer').children('.notSelected');
-				selectedVehicles.remove();
+				//remove vehicle variant group that are not checked.
+				var notSelectedVehicles = $('#selectVehiclesContainer').children('.notSelected');
+				notSelectedVehicles.remove();
+		
+				var selectedVehicles = $('#selectVehiclesContainer').children('.someSelected');
+				selectedVehicles.each(function(obj) {$(this).children('.vehicleGroupHeader').siblings().slideUp(400);});
 			}
 			
+			//M O D E L
 			if ($this.parent().attr("id") == "filterModelContainer") {
 				$('#filterVariantContainer').empty();
 				loadVariantSelectBox($this.data("id"), $this.data("title"), $this.data("make"), $this.data("makeid"));
 				
 				//remove vehicles that are not checked.
-				var selectedVehicles = $('#selectVehiclesContainer').children('.notSelected');
-				selectedVehicles.remove();
+				var notSelectedVehicles = $('#selectVehiclesContainer').children('.notSelected');
+				notSelectedVehicles.remove();
+				
+				var selectedVehicles = $('#selectVehiclesContainer').children('.someSelected');
+				selectedVehicles.each(function(obj) {$(this).children('.vehicleGroupHeader').siblings().slideUp(400);});
 			}
 			
+			//V A R I A N T
 			if ($this.parent().attr("id") == "filterVariantContainer") {
-				addToVehiclesSelectBox($this.data("id"), $this.data("title"), $this.data("model"), $this.data("make"), $this.data("makeid"), $this.data("modelid"));			
+				//remove vehicles that are not checked.
+				//var notSelectedVehicles = $('#selectVehiclesContainer').children('.notSelected');
+				//notSelectedVehicles.remove();
+				
+				//var selectedVehicles = $('#selectVehiclesContainer').children('.someSelected');
+				var selectedVehicles = $('#selectVehiclesContainer').children();
+				selectedVehicles.each(function(obj) {$(this).children('.vehicleGroupHeader').siblings().slideUp(400);});
+				
+				addToVehiclesSelectBox($this.data("id"), $this.data("title"), $this.data("model"), $this.data("make"), $this.data("makeid"), $this.data("modelid"));
 			}
 			
 		});	
@@ -187,6 +205,10 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 		
 		//Event handler for vehicle disclosure
 		$('#selectVehiclesContainer').on('click', '.vehicleGroupHeader', function() {
+			var selectedVehicles = $('#selectVehiclesContainer').children();
+				selectedVehicles.each(function(obj) {$(this).children('.vehicleGroupHeader').siblings().slideUp(400);});
+				
+				
 			$this = $(this);
 			$this.siblings().toggle();
 			/*
@@ -201,28 +223,14 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 				wrapper = eventTarget$.parent().parent(),
 				vehicleGroupHeader = wrapper.children(':first'),
 				vehiclesSelectedText = wrapper.find('span'),
-				//vehicleCheckedCount = vehicleGroupHeader.data("count");
 				vehicleCheckedCount = +vehicleGroupHeader.attr("data-count");
-				
-				//console.log(vehicleCheckedCount);
-				//console.log(vehiclesSelectedText.html());
-				
-				//eventTarget$.parent().parent();
 			
 			if (eventTarget$.prop('checked')) {
-				//add Perm Select class to vehicle group wrapper.
-				/*
-				var wrapper = eventTarget$.parent().parent(),
-					vehicleGroupHeader = wrapper.children(':first'),
-					vehicleCheckedCount = vehicleGroupHeader.data("count");
-				*/
-				
-					
 				wrapper.removeClass('notSelected');
+				wrapper.addClass('someSelected');
 				vehicleCheckedCount += 1;
 				vehiclesSelectedText.text(" • " + vehicleCheckedCount + " vehicles selected");
 				vehicleGroupHeader.attr("data-count", vehicleCheckedCount);
-				//console.log(vehicleGroupHeader.attr("data-count"));
 				
 				//add Perm Select to the make and model and variant for this session.
 				$('#filterMakeContainer').find("div[data-id='" + eventTarget$.data("makeid") +"']").addClass('selectedPerm');
@@ -234,6 +242,7 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 			} else {
 				//add Perm Select class to vehicle group wrapper.
 				eventTarget$.parent().parent().addClass('notSelected');
+				wrapper.removeClass('someSelected');
 				
 				//remove Perm Select to the make and model and variant for this session.
 				$('#filterMakeContainer').find("div[data-id='" + eventTarget$.data("makeid") +"']").removeClass('selectedPerm');

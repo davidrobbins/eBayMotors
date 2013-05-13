@@ -208,13 +208,8 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 			var selectedVehicles = $('#selectVehiclesContainer').children();
 				selectedVehicles.each(function(obj) {$(this).children('.vehicleGroupHeader').siblings().slideUp(400);});
 				
-				
 			$this = $(this);
 			$this.siblings().toggle();
-			/*
-			$this.nextUntil('dt').slideDown(300);
-			$this.siblings('dt').nextUntil('dt').slideUp(300);
-			*/
 		});
 				
 		$('#selectVehiclesContainer').on('click', '.vehicleManufacture', function(event) {
@@ -228,6 +223,7 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 			if (eventTarget$.prop('checked')) {
 				wrapper.removeClass('notSelected');
 				wrapper.addClass('someSelected');
+				//update vehicle selected text
 				vehicleCheckedCount += 1;
 				vehiclesSelectedText.text(" • " + vehicleCheckedCount + " vehicles selected");
 				vehicleGroupHeader.attr("data-count", vehicleCheckedCount);
@@ -239,10 +235,16 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 				//keep track of the permanently selected models and variants.
 				permModelIds.push($this.data("modelid"));
 				permVariantIds.push($this.data("id"));
+			
 			} else {
-				//add Perm Select class to vehicle group wrapper.
-				eventTarget$.parent().parent().addClass('notSelected');
-				wrapper.removeClass('someSelected');
+				vehicleCheckedCount -= 1;
+				vehicleCheckedCount > 0 ? vehiclesSelectedText.text(" • " + vehicleCheckedCount + " vehicles selected") : vehiclesSelectedText.text(" • no vehicles selected");
+				vehicleGroupHeader.attr("data-count", vehicleCheckedCount);
+				
+				if (vehicleCheckedCount == 0) {
+					eventTarget$.parent().parent().addClass('notSelected');
+					wrapper.removeClass('someSelected');
+				}
 				
 				//remove Perm Select to the make and model and variant for this session.
 				$('#filterMakeContainer').find("div[data-id='" + eventTarget$.data("makeid") +"']").removeClass('selectedPerm');

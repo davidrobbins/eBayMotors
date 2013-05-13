@@ -202,7 +202,7 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 				vehicleGroupHeader = wrapper.children(':first'),
 				vehicleCheckedCount = vehicleGroupHeader.data("count");
 				
-				console.log(vehicleCheckedCount);
+				//console.log(vehicleCheckedCount);
 				
 				//eventTarget$.parent().parent();
 			

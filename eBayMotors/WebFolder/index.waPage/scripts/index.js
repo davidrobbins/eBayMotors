@@ -244,13 +244,13 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 				if (vehicleCheckedCount == 0) {
 					eventTarget$.parent().parent().addClass('notSelected');
 					wrapper.removeClass('someSelected');
+					//remove Perm Select to the make and model and variant for this session.
+					$('#filterMakeContainer').find("div[data-id='" + eventTarget$.data("makeid") +"']").removeClass('selectedPerm');
+					$('#filterModelContainer').find("div[data-id='" + eventTarget$.data("modelid") +"']").removeClass('selectedPerm');
+					$('#filterVariantContainer').find("div[data-id='" + eventTarget$.data("variantid") +"']").removeClass('selectedPerm');
+
 				}
-				
-				//remove Perm Select to the make and model and variant for this session.
-				$('#filterMakeContainer').find("div[data-id='" + eventTarget$.data("makeid") +"']").removeClass('selectedPerm');
-				$('#filterModelContainer').find("div[data-id='" + eventTarget$.data("modelid") +"']").removeClass('selectedPerm');
-				$('#filterVariantContainer').find("div[data-id='" + eventTarget$.data("variantid") +"']").removeClass('selectedPerm');
-				
+								
 				var permModelIndex = permModelIds.indexOf($this.data("modelid")),
 					permVariantIndex = permVariantIds.indexOf($this.data("modelid"));
 				permModelIds.splice(permModelIndex,1);

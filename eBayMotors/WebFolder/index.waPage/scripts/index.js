@@ -15,8 +15,9 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 		this.el = document.getElementById(el);
 	}
 	
-	FilterListBox.prototype.load = function(getListItemsFn, makeId, makeTitle, modelId, modelTitle) {
-		getListItemsFn(this.el, makeId, makeTitle, modelId, modelTitle);
+	
+	FilterListBox.prototype.load = function(getListItemsFn, paramtersObj) {
+		getListItemsFn(this.el, paramtersObj);
 	};
 	
 	FilterListBox.prototype.unload = function() {
@@ -115,10 +116,11 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 		});
 	} //end - injectMakes
 	
-	function getModels(listBox, makeId, makeTitle) {
+	//function getModels(listBox, makeId, makeTitle) {
+	function getModels(listBox, paramtersObj) {
 		var frag = document.createDocumentFragment();
 		
-		ds.Model.query("make.ID == :1", makeId, {
+		ds.Model.query("make.ID == :1", paramtersObj.makeId, {
 			onSuccess: function(ev1) {
 				ev1.entityCollection.forEach({
 					onSuccess: function(ev2) {
@@ -131,8 +133,8 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 						newDiv$.attr("class", theClassesString);
 						newDiv$.attr("data-id", ev2.entity.ID.getValue());
 						newDiv$.attr("data-title", title);
-						newDiv$.attr("data-make", makeTitle);
-						newDiv$.attr("data-makeid", makeId);
+						newDiv$.attr("data-make", paramtersObj.makeTitle);
+						newDiv$.attr("data-makeid", paramtersObj.makeId);
 						newDiv$.text(title);
 						frag.appendChild(newDiv);
 						
@@ -146,10 +148,11 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 		
 	} //end - getModels()
 	
-	function getVariants(listBox, makeId, makeTitle, modelId, modelTitle) {
+	//function getVariants(listBox, makeId, makeTitle, modelId, modelTitle) {
+	function getVariants(listBox, paramtersObj) {
 		var frag = document.createDocumentFragment();
 		
-		ds.Variant.query("model.ID == :1", modelId, {
+		ds.Variant.query("model.ID == :1", paramtersObj.modelId, {
 			onSuccess: function(ev1) {
 				ev1.entityCollection.forEach({
 					onSuccess: function(ev2) {
@@ -161,10 +164,10 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 						newDiv$.attr("class", theClassesString);
 						newDiv$.attr("data-id", ev2.entity.ID.getValue());
 						newDiv$.attr("data-title", title);
-						newDiv$.attr("data-make", makeTitle);
-						newDiv$.attr("data-makeid", makeId);
-						newDiv$.attr("data-model", modelTitle);
-						newDiv$.attr("data-modelid", modelId);
+						newDiv$.attr("data-make", paramtersObj.makeTitle);
+						newDiv$.attr("data-makeid", paramtersObj.makeId);
+						newDiv$.attr("data-model", paramtersObj.modelTitle);
+						newDiv$.attr("data-modelid", paramtersObj.modelId);
 						newDiv$.text(title);
 						frag.appendChild(newDiv);	
 					},
@@ -195,7 +198,7 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 			if ($this.parent().attr("id") == "filterMakeContainer") {
 				variantsFilterList.unload();
 				modelsFilterList.unload();
-				modelsFilterList.load(getModels, $this.data("id"), $this.data("title")); //Load the Models.
+				modelsFilterList.load(getModels, {makeId: $this.data("id"), makeTitle: $this.data("title")}); //Load the Models.
 				
 				//remove vehicle variant group that are not checked.
 				var notSelectedVehicles = $('#selectVehiclesContainer').children('.notSelected');
@@ -208,7 +211,7 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 			//M O D E L
 			if ($this.parent().attr("id") == "filterModelContainer") {
 				variantsFilterList.unload();
-				variantsFilterList.load(getVariants, $this.data("makeid"), $this.data("make"), $this.data("id"), $this.data("title"));
+				variantsFilterList.load(getVariants, {makeId: $this.data("makeid"), makeTitle: $this.data("make"), modelId: $this.data("id"), modelTitle: $this.data("title")});
 		
 				//remove vehicles that are not checked.
 				var notSelectedVehicles = $('#selectVehiclesContainer').children('.notSelected');

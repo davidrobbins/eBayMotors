@@ -5,6 +5,24 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 	var documentEvent = {};	// @document
 // @endregion// @endlock
 	
+	var makesFilterList,
+		modelsFilterList,
+		variantsFilterList;
+	
+	
+	//Let's make a FilterListBox constructor.
+	function FilterListBox(el) {
+		this.el = document.getElementById(el);
+	}
+	
+	FilterListBox.prototype.load = function(getListItemsFn, makeId, makeTitle, modelId, modelTitle) {
+		getListItemsFn(this.el, makeId, makeTitle, modelId, modelTitle);
+	};
+	
+	FilterListBox.prototype.unload = function() {
+		$(this.el).empty();
+	};	
+	
 	var permModelIds = [],
 		permVariantIds = [];
 	
@@ -71,81 +89,102 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 		
 	}
 	
-	function loadVariantSelectBox(modelId, modelTitle, makeTitle, makeId) {
-		ds.Variant.query("model.ID == :1", modelId, {
-			onSuccess: function(ev1) {
-				//$('#filterVariantContainer').empty();
-				if (ev1.entityCollection.length > 0) {
-					ev1.entityCollection.forEach({
-						onSuccess: function(ev2) {
-							var theClassesString = permVariantIds.indexOf(ev2.entity.ID.getValue()) != -1 ? "selectionElement selectedPerm" : "selectionElement"; 
-							var title = ev2.entity.title.getValue();
-							$('<div>', {
-								text: title,
-								"class" : theClassesString,
-								"data-id" : ev2.entity.ID.getValue(),
-								"data-title" : title,
-								"data-model" : modelTitle,
-								"data-make" : makeTitle,
-								"data-makeid" : makeId,
-								"data-modelid" : modelId
-							}).appendTo('#filterVariantContainer');
-						}
-					});
-				}
-			}
-		});
-	}
-	
-	function loadModelSelectBox(makeId, makeTitle) {
-		ds.Model.query("make.ID == :1", makeId, {
-			onSuccess: function(ev1) {
-				$('#filterModelContainer').empty();
-				if (ev1.entityCollection.length > 0) {
-					ev1.entityCollection.forEach({
-						onSuccess: function(ev2) {
-							//permModelIds
-							var theClassesString = permModelIds.indexOf(ev2.entity.ID.getValue()) != -1 ? "selectionElement selectedPerm" : "selectionElement"; 
-							
-							var title = ev2.entity.title.getValue();
-							$('<div>', {
-								text: title,
-								"class" : theClassesString,
-								"data-id" : ev2.entity.ID.getValue(),
-								"data-title" : title,
-								"data-make" : makeTitle,
-								"data-makeid" : makeId
-							}).appendTo('#filterModelContainer');
-						}
-					});
-				}
-			}
-		});
-	}
-
-	function loadMakeSelectBox() {
+	function getMakes(listBox) {
+		var frag = document.createDocumentFragment();
+		
 		ds.Make.all({
 			onSuccess: function(ev1) {
 				ev1.entityCollection.forEach({
-					onSuccess: function(ev2) {	
-						//Use jQuery to build the Definition Titles.
-						var title = ev2.entity.title.getValue();
-						$('<div>', {
-							text: title,
-							"class" : "selectionElement",
-							"data-id" : ev2.entity.ID.getValue(),
-							"data-title" : title
-						}).appendTo('#filterMakeContainer');	
+					onSuccess: function(ev2) {
+						var title = ev2.entity.title.getValue(),
+						    newDiv = document.createElement('div'),
+							newDiv$ = $(newDiv);
+						
+						newDiv$.attr("text", title);
+						newDiv$.attr("class", "selectionElement");
+						newDiv$.attr("data-id", ev2.entity.ID.getValue());
+						newDiv$.attr("data-title", title);
+						newDiv$.text(title);
+						frag.appendChild(newDiv);
+					}, //end - onSuccess.
+					atTheEnd: function() {
+						listBox.appendChild(frag);
 					}
-				});
+				}); //end - forEach.
 			} //end - onSuccess: function(ev1)
 		});
-	}
+	} //end - injectMakes
+	
+	function getModels(listBox, makeId, makeTitle) {
+		var frag = document.createDocumentFragment();
+		
+		ds.Model.query("make.ID == :1", makeId, {
+			onSuccess: function(ev1) {
+				ev1.entityCollection.forEach({
+					onSuccess: function(ev2) {
+					 	//permModelIds
+						var theClassesString = permModelIds.indexOf(ev2.entity.ID.getValue()) != -1 ? "selectionElement selectedPerm" : "selectionElement",
+							title = ev2.entity.title.getValue(),
+						    newDiv = document.createElement('div'),
+							newDiv$ = $(newDiv);
+						
+						newDiv$.attr("class", theClassesString);
+						newDiv$.attr("data-id", ev2.entity.ID.getValue());
+						newDiv$.attr("data-title", title);
+						newDiv$.attr("data-make", makeTitle);
+						newDiv$.attr("data-makeid", makeId);
+						newDiv$.text(title);
+						frag.appendChild(newDiv);
+						
+					}, //end - onSuccess.
+					atTheEnd: function() {
+						listBox.appendChild(frag);
+					}
+				}); //end - forEach.
+			} //end - ds.Model.query {onSuccess: }.
+		}); //end - ds.Model.query.
+		
+	} //end - getModels()
+	
+	function getVariants(listBox, makeId, makeTitle, modelId, modelTitle) {
+		var frag = document.createDocumentFragment();
+		
+		ds.Variant.query("model.ID == :1", modelId, {
+			onSuccess: function(ev1) {
+				ev1.entityCollection.forEach({
+					onSuccess: function(ev2) {
+						var theClassesString = permVariantIds.indexOf(ev2.entity.ID.getValue()) != -1 ? "selectionElement selectedPerm" : "selectionElement",
+							title = ev2.entity.title.getValue(),
+							newDiv = document.createElement('div'),
+							newDiv$ = $(newDiv);
+							
+						newDiv$.attr("class", theClassesString);
+						newDiv$.attr("data-id", ev2.entity.ID.getValue());
+						newDiv$.attr("data-title", title);
+						newDiv$.attr("data-make", makeTitle);
+						newDiv$.attr("data-makeid", makeId);
+						newDiv$.attr("data-model", modelTitle);
+						newDiv$.attr("data-modelid", modelId);
+						newDiv$.text(title);
+						frag.appendChild(newDiv);	
+					},
+					atTheEnd: function() {
+						listBox.appendChild(frag);
+					}		
+				}); //end - forEach
+			} //end - ds.Variant.query({onSuccess: });
+		}); //end - ds.Variant.query();
+	} //end - getVariants().
 // eventHandlers// @lock
 
 	documentEvent.onLoad = function documentEvent_onLoad (event)// @startlock
 	{// @endlock
-		loadMakeSelectBox();
+		//First instantiate our Filter containers.
+		makesFilterList = new FilterListBox('filterMakeContainer');
+		modelsFilterList = new FilterListBox('filterModelContainer');
+		variantsFilterList = new FilterListBox('filterVariantContainer');
+		
+		makesFilterList.load(getMakes); //Load the Makes.
 		
 		$('div.filterContainer').on('click', 'div', function(event) {
 			$this.siblings().removeClass('inFocus selected');
@@ -154,9 +193,9 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 			
 			//M A K E
 			if ($this.parent().attr("id") == "filterMakeContainer") {
-				$('#filterModelContainer').empty();
-				$('#filterVariantContainer').empty();
-				loadModelSelectBox($this.data("id"), $this.data("title"));
+				variantsFilterList.unload();
+				modelsFilterList.unload();
+				modelsFilterList.load(getModels, $this.data("id"), $this.data("title")); //Load the Models.
 				
 				//remove vehicle variant group that are not checked.
 				var notSelectedVehicles = $('#selectVehiclesContainer').children('.notSelected');
@@ -168,9 +207,9 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 			
 			//M O D E L
 			if ($this.parent().attr("id") == "filterModelContainer") {
-				$('#filterVariantContainer').empty();
-				loadVariantSelectBox($this.data("id"), $this.data("title"), $this.data("make"), $this.data("makeid"));
-				
+				variantsFilterList.unload();
+				variantsFilterList.load(getVariants, $this.data("makeid"), $this.data("make"), $this.data("id"), $this.data("title"));
+		
 				//remove vehicles that are not checked.
 				var notSelectedVehicles = $('#selectVehiclesContainer').children('.notSelected');
 				notSelectedVehicles.remove();
@@ -181,11 +220,6 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 			
 			//V A R I A N T
 			if ($this.parent().attr("id") == "filterVariantContainer") {
-				//remove vehicles that are not checked.
-				//var notSelectedVehicles = $('#selectVehiclesContainer').children('.notSelected');
-				//notSelectedVehicles.remove();
-				
-				//var selectedVehicles = $('#selectVehiclesContainer').children('.someSelected');
 				var selectedVehicles = $('#selectVehiclesContainer').children();
 				selectedVehicles.each(function(obj) {$(this).children('.vehicleGroupHeader').siblings().slideUp(400);});
 				

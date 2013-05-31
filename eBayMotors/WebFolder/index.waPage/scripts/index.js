@@ -13,11 +13,46 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 	//Let's make a FilterListBox constructor.
 	function FilterListBox(el) {
 		this.el = document.getElementById(el);
+		
+		//Implement a simple example of Observer pattern.
+		this.subscribers =  {
+			any: []
+		};
 	}
 	
+	//Observer Pattern methods.
+	FilterListBox.prototype.subscribe = function(fn, type) {
+		type = type || 'any';
+		if (typeof this.subscribers[type] === 'undefined') {
+			this.subscribers[type] = [];
+		}
+		this.subscribers[type].push(fn);
+	}; //end - subscribe.
 	
+	FilterListBox.prototype.visitSubscribers = function(action, arg, type) {
+		var pubtype = type || 'any',
+			subscribers = this.subscribers[pubtype],
+			i,
+			max = subscribers.length;
+			
+		for (i = 0; i < max; i += 1) {
+			if (action === 'publish') {
+				subscribers[i](arg);
+			} else {
+				if (subscribers[i] === arg) {
+					subscribers.splice(i, 1);	
+				}
+			}
+		} //end - for
+	}; //end - visitSubscribers.
+	
+	FilterListBox.prototype.publish = function(publication, type) {
+		this.visitSubscribers('publish', publication, type);
+	}
+	
+	//Load and unload methods.
 	FilterListBox.prototype.load = function(getListItemsFn, paramtersObj) {
-		getListItemsFn(this.el, paramtersObj);
+		getListItemsFn(this.el, paramtersObj); 
 	};
 	
 	FilterListBox.prototype.unload = function() {
@@ -90,7 +125,7 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 		
 	}
 	
-	function getMakes(listBox) {
+	function getMakes(listBox, paramtersObj) {
 		var frag = document.createDocumentFragment();
 		
 		ds.Make.all({
@@ -116,7 +151,6 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 		});
 	} //end - injectMakes
 	
-	//function getModels(listBox, makeId, makeTitle) {
 	function getModels(listBox, paramtersObj) {
 		var frag = document.createDocumentFragment();
 		
@@ -148,7 +182,6 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 		
 	} //end - getModels()
 	
-	//function getVariants(listBox, makeId, makeTitle, modelId, modelTitle) {
 	function getVariants(listBox, paramtersObj) {
 		var frag = document.createDocumentFragment();
 		
@@ -187,6 +220,25 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 		modelsFilterList = new FilterListBox('filterModelContainer');
 		variantsFilterList = new FilterListBox('filterVariantContainer');
 		
+		modelsFilterList.onMakeClick = function(event) {
+				modelsFilterList.unload();
+				modelsFilterList.load(getModels, event); //Load the Models.
+		}
+		
+		variantsFilterList.onMakeClick = function(event) {
+				variantsFilterList.unload();
+		}
+		
+		variantsFilterList.onModelClick = function(event) {
+				variantsFilterList.unload();
+				variantsFilterList.load(getVariants, event);	
+		}
+		
+		makesFilterList.subscribe(modelsFilterList.onMakeClick, "on click"); //makesFilterList will be notified when a user clicks on a Make.
+		makesFilterList.subscribe(variantsFilterList.onMakeClick, "on click"); //variantsFilterList will be notified when a user clicks on a Make.
+		modelsFilterList.subscribe(variantsFilterList.onModelClick, "on click");
+		
+		
 		makesFilterList.load(getMakes); //Load the Makes.
 		
 		$('div.filterContainer').on('click', 'div', function(event) {
@@ -196,9 +248,7 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 			
 			//M A K E
 			if ($this.parent().attr("id") == "filterMakeContainer") {
-				variantsFilterList.unload();
-				modelsFilterList.unload();
-				modelsFilterList.load(getModels, {makeId: $this.data("id"), makeTitle: $this.data("title")}); //Load the Models.
+				makesFilterList.publish({makeId: $this.data("id"), makeTitle: $this.data("title")}, "on click");
 				
 				//remove vehicle variant group that are not checked.
 				var notSelectedVehicles = $('#selectVehiclesContainer').children('.notSelected');
@@ -210,9 +260,8 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 			
 			//M O D E L
 			if ($this.parent().attr("id") == "filterModelContainer") {
-				variantsFilterList.unload();
-				variantsFilterList.load(getVariants, {makeId: $this.data("makeid"), makeTitle: $this.data("make"), modelId: $this.data("id"), modelTitle: $this.data("title")});
-		
+				modelsFilterList.publish({makeId: $this.data("makeid"), makeTitle: $this.data("make"), modelId: $this.data("id"), modelTitle: $this.data("title")}, "on click");
+				
 				//remove vehicles that are not checked.
 				var notSelectedVehicles = $('#selectVehiclesContainer').children('.notSelected');
 				notSelectedVehicles.remove();

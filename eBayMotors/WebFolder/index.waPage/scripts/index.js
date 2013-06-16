@@ -152,6 +152,7 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 	} //end - injectMakes
 	
 	function getModels(listBox, paramtersObj) {
+		//console.log("Perm Models: " + permModelIds);
 		var frag = document.createDocumentFragment();
 		
 		ds.Model.query("make.ID == :1", paramtersObj.makeId, {
@@ -215,6 +216,13 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 
 	documentEvent.onLoad = function documentEvent_onLoad (event)// @startlock
 	{// @endlock
+		/*
+		var filterCollectionView = new FilterCollectionView({
+			model: "Vehicle",
+			attributes: ["make", "model", "variant"]
+		});
+		*/
+		
 		//First instantiate our Filter containers.
 		makesFilterList = new FilterListBox('filterMakeContainer');
 		modelsFilterList = new FilterListBox('filterModelContainer');
@@ -245,6 +253,8 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 			$this.siblings().removeClass('inFocus selected');
 			$this = $(this);
 			$this.addClass('selected');
+			
+			// function (element, filter) {}
 			
 			//M A K E
 			if ($this.parent().attr("id") == "filterMakeContainer") {
@@ -318,9 +328,10 @@ WAF.onAfterInit = function onAfterInit() {// @lock
 				$('#filterMakeContainer').find("div[data-id='" + eventTarget$.data("makeid") +"']").addClass('selectedPerm');
 				$('#filterModelContainer').find("div[data-id='" + eventTarget$.data("modelid") +"']").addClass('selectedPerm');
 				$('#filterVariantContainer').find("div[data-id='" + eventTarget$.data("variantid") +"']").addClass('selectedPerm');
+				
 				//keep track of the permanently selected models and variants.
-				permModelIds.push($this.data("modelid"));
-				permVariantIds.push($this.data("id"));
+				permModelIds.push(eventTarget$.data("modelid"));
+				permVariantIds.push(eventTarget$.data("variantid"));
 			
 			} else {
 				vehicleCheckedCount -= 1;
